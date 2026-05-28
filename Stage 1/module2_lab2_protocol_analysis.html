@@ -1,0 +1,328 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.w{padding:1.5rem 0;font-family:var(--font-sans)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent}
+.tab.on{background:#E6F1FB;color:#0C447C;border-color:#85B7EB}
+.tc{display:none}.tc.on{display:block}
+.task{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.task:last-child{border-bottom:none}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--color-border-secondary);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chk.done{background:#1D9E75;border-color:#1D9E75}
+.chk.done::after{content:'';display:block;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
+.tlabel{font-size:14px;color:var(--color-text-primary);line-height:1.5;flex:1}
+.tlabel.done{color:var(--color-text-tertiary);text-decoration:line-through}
+.tsub{font-size:12px;color:var(--color-text-tertiary);margin-top:3px;line-height:1.5}
+.ptrack{flex:1;height:5px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.pfill{height:100%;border-radius:3px;background:#1D9E75;transition:width .4s}
+.proto-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.proto-row:last-child{border-bottom:none}
+.pbadge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;flex-shrink:0;margin-top:2px;min-width:60px;text-align:center}
+.pname{font-size:13px;font-weight:500;color:var(--color-text-primary);width:90px;flex-shrink:0;margin-top:1px}
+.pdet{font-size:12px;color:var(--color-text-secondary);flex:1;line-height:1.6}
+.filter-pill{display:inline-block;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:99px;padding:2px 10px;font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary);margin:2px 3px 2px 0}
+.cmd{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 12px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary);margin:6px 0;line-height:1.6}
+.qopt{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.qopt:hover{background:var(--color-background-secondary)}
+.qopt.ok{background:#E1F5EE;border-color:#5DCAA5;color:#085041}
+.qopt.no{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.qres{font-size:13px;padding:8px 12px;border-radius:var(--border-radius-md);margin-top:8px;display:none}
+.qres.show{display:block}
+.handshake{display:flex;gap:0;margin:12px 0}
+.hs-col{flex:1;display:flex;flex-direction:column;gap:0}
+.hs-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:6px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)}
+.hs-arrow{display:flex;align-items:center;padding:8px 0}
+.hs-line{flex:1;height:1px;background:var(--color-border-secondary)}
+.hs-tag{font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.hs-mid{display:flex;flex-direction:column;align-items:center;gap:4px;flex:2;padding:4px 0}
+.section-lbl{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.75rem}
+</style>
+
+<div class="w">
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+  <div style="flex:1;font-size:15px;font-weight:500;color:var(--color-text-primary)">Module 2 + Lab 2 — Protocol analysis</div>
+  <span style="font-size:13px;color:var(--color-text-secondary)" id="plabel">0 / 9</span>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem">
+  <div class="ptrack"><div class="pfill" id="pbar" style="width:0%"></div></div>
+  <span style="font-size:12px;color:var(--color-text-tertiary)" id="ppct">0%</span>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('protocols',this)">Protocol guide</button>
+  <button class="tab" onclick="sw('handshake',this)">TCP handshake</button>
+  <button class="tab" onclick="sw('tasks',this)">Lab 2 tasks</button>
+  <button class="tab" onclick="sw('terminal',this)">Windows terminal</button>
+  <button class="tab" onclick="sw('quiz',this)">Knowledge check</button>
+</div>
+
+<div class="tc on" id="tc-protocols">
+  <div class="section-lbl">Protocols you will encounter every day in security</div>
+  <div class="card">
+    <div class="proto-row">
+      <div class="pbadge" style="background:#E6F1FB;color:#185FA5">TCP</div>
+      <div>
+        <div class="pname">TCP</div>
+        <div class="pdet">Connection-oriented. Guarantees delivery via handshake + acknowledgements. Every web page, login, and file transfer uses it. Filter: <span class="filter-pill">tcp</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#EAF3DE;color:#3B6D11">DNS</div>
+      <div>
+        <div class="pname">DNS</div>
+        <div class="pdet">Translates domain names to IPs. Every internet connection starts with a DNS query. Malware hides in unusual DNS. Filter: <span class="filter-pill">dns</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#EEEDFE;color:#534AB7">HTTP</div>
+      <div>
+        <div class="pname">HTTP/S</div>
+        <div class="pdet">Web traffic. HTTP = fully readable. HTTPS = encrypted (TLS). You can see HTTPS but cannot read the body. Filter: <span class="filter-pill">http</span> <span class="filter-pill">tls</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#FAEEDA;color:#854F0B">ARP</div>
+      <div>
+        <div class="pname">ARP</div>
+        <div class="pdet">Maps IP → MAC on local network. Poisoning ARP = MITM attack. No Layer 3 — stays on your subnet only. Filter: <span class="filter-pill">arp</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#FCEBEB;color:#A32D2D">ICMP</div>
+      <div>
+        <div class="pname">ICMP</div>
+        <div class="pdet">Ping and traceroute. Used in network recon and DoS floods. No ports — works at Layer 3 only. Filter: <span class="filter-pill">icmp</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#F1EFE8;color:#5F5E5A">FTP</div>
+      <div>
+        <div class="pname">FTP / Telnet</div>
+        <div class="pdet">Legacy protocols — passwords travel in plain text. Still found in industrial/power infrastructure. Critical to detect. Filter: <span class="filter-pill">ftp</span> <span class="filter-pill">telnet</span></div>
+      </div>
+    </div>
+    <div class="proto-row">
+      <div class="pbadge" style="background:#E1F5EE;color:#085041">UDP</div>
+      <div>
+        <div class="pname">UDP</div>
+        <div class="pdet">Connectionless — no handshake, no guarantee. Used by DNS, DHCP, video streaming. Attackers use it for amplification DDoS. Filter: <span class="filter-pill">udp</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tc" id="tc-handshake">
+  <div class="section-lbl">TCP 3-way handshake — what it looks like in Wireshark</div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+        <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">Your machine</div>
+        <div style="font-size:11px;color:var(--color-text-tertiary)">192.168.1.x</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+        <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">Server</div>
+        <div style="font-size:11px;color:var(--color-text-tertiary)">104.x.x.x :80</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="width:40%;font-size:12px;color:var(--color-text-tertiary)">Packet 1</div>
+      <div style="flex:1;display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:1px;background:#378ADD"></div>
+        <div style="font-size:11px;padding:3px 8px;border-radius:99px;background:#E6F1FB;color:#185FA5;font-weight:500;white-space:nowrap">SYN →</div>
+        <div style="flex:1;height:1px;background:#378ADD"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0 10px;border-bottom:0.5px solid var(--color-border-tertiary)">"I want to connect. Here is my sequence number."  Flags: SYN=1, ACK=0. Wireshark filter: <span class="filter-pill">tcp.flags.syn==1 && tcp.flags.ack==0</span></div>
+    <div style="display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="width:40%;font-size:12px;color:var(--color-text-tertiary)">Packet 2</div>
+      <div style="flex:1;display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:1px;background:#1D9E75"></div>
+        <div style="font-size:11px;padding:3px 8px;border-radius:99px;background:#E1F5EE;color:#085041;font-weight:500;white-space:nowrap">← SYN-ACK</div>
+        <div style="flex:1;height:1px;background:#1D9E75"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0 10px;border-bottom:0.5px solid var(--color-border-tertiary)">"Got it. I'm ready. Here is MY sequence number."  Flags: SYN=1, ACK=1. Wireshark filter: <span class="filter-pill">tcp.flags.syn==1 && tcp.flags.ack==1</span></div>
+    <div style="display:flex;align-items:center;padding:8px 0">
+      <div style="width:40%;font-size:12px;color:var(--color-text-tertiary)">Packet 3</div>
+      <div style="flex:1;display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:1px;background:#7F77DD"></div>
+        <div style="font-size:11px;padding:3px 8px;border-radius:99px;background:#EEEDFE;color:#534AB7;font-weight:500;white-space:nowrap">ACK →</div>
+        <div style="flex:1;height:1px;background:#7F77DD"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0 0">"Acknowledged. Connection established." Data transfer starts from next packet.  Flags: SYN=0, ACK=1.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">Security relevance at your Power Grid job</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">A SYN flood attack sends thousands of SYN packets without ever completing the handshake. The server allocates memory for each half-open connection and eventually runs out. Filter <span class="filter-pill">tcp.flags.syn==1 && tcp.flags.ack==0</span> and look for one source IP sending to many destination ports or many times per second — that is your indicator.</div>
+  </div>
+</div>
+
+<div class="tc" id="tc-tasks">
+  <div class="section-lbl">Part A — TCP handshake capture</div>
+  <div class="card">
+    <div class="task" onclick="tick(0)">
+      <div class="chk" id="c0"></div>
+      <div><div class="tlabel" id="t0">Flush DNS cache, then start a fresh Wireshark capture</div><div class="tsub">PowerShell: ipconfig /flushdns — then immediately start capturing. This ensures the next browser visit generates both DNS AND TCP handshake packets you can observe.</div></div>
+    </div>
+    <div class="task" onclick="tick(1)">
+      <div class="chk" id="c1"></div>
+      <div><div class="tlabel" id="t1">Visit http://neverssl.com — then stop capture after 10 seconds</div><div class="tsub">You need a fresh visit to a never-before-visited site so the full handshake occurs. Apply filter: tcp.flags.syn==1 — you should see 3 packets: SYN, SYN-ACK, ACK in sequence.</div></div>
+    </div>
+    <div class="task" onclick="tick(2)">
+      <div class="chk" id="c2"></div>
+      <div><div class="tlabel" id="t2">Find the SYN packet. Expand TCP layer. Read the Sequence Number.</div><div class="tsub">Every TCP connection starts with a random initial sequence number. The server uses this to order all future packets. Note the value — it is unique to this connection.</div></div>
+    </div>
+    <div class="task" onclick="tick(3)">
+      <div class="chk" id="c3"></div>
+      <div><div class="tlabel" id="t3">Find the SYN-ACK. Confirm Acknowledgement Number = your SYN seq + 1</div><div class="tsub">The server's ACK number equals your sequence number + 1. This proves it received your SYN. This is how TCP guarantees delivery — every byte must be acknowledged.</div></div>
+    </div>
+  </div>
+  <div class="section-lbl">Part B — DNS dissection</div>
+  <div class="card">
+    <div class="task" onclick="tick(4)">
+      <div class="chk" id="c4"></div>
+      <div><div class="tlabel" id="t4">Apply filter: dns — find the query for neverssl.com</div><div class="tsub">You will see two packets: a DNS Query (your machine asking) and a DNS Response (the DNS server answering). The query travels over UDP port 53. Note the transaction ID — it matches in both query and response.</div></div>
+    </div>
+    <div class="task" onclick="tick(5)">
+      <div class="chk" id="c5"></div>
+      <div><div class="tlabel" id="t5">Expand the DNS Response. Read the Answer section — note the IP returned.</div><div class="tsub">Expand Domain Name System → Answers → A record. The IP here is exactly what your browser used to connect. Cross-check: it must match the Destination IP you saw in the TCP handshake SYN packet.</div></div>
+    </div>
+    <div class="task" onclick="tick(6)">
+      <div class="chk" id="c6"></div>
+      <div><div class="tlabel" id="t6">Apply filter: dns and look at the Query Type field</div><div class="tsub">Type A = IPv4 address lookup. Type AAAA = IPv6 lookup. Type MX = mail server lookup. Type TXT = text records. In security, attackers abuse TXT records for data exfiltration — that is DNS tunnelling.</div></div>
+    </div>
+  </div>
+  <div class="section-lbl">Part C — ARP on your local network</div>
+  <div class="card">
+    <div class="task" onclick="tick(7)">
+      <div class="chk" id="c7"></div>
+      <div><div class="tlabel" id="t7">Start a new capture. Apply display filter: arp immediately</div><div class="tsub">Within seconds you will see ARP packets broadcasting "Who has X.X.X.X? Tell Y.Y.Y.Y". This is your machine or others on the subnet discovering MAC addresses. ARP only works within your local network — it never crosses a router.</div></div>
+    </div>
+    <div class="task" onclick="tick(8)">
+      <div class="chk" id="c8"></div>
+      <div><div class="tlabel" id="t8">Find an ARP Reply. Expand it. Note the Sender MAC and Sender IP together.</div><div class="tsub">This is the critical data in ARP. In an ARP poisoning attack, a malicious machine sends fake ARP Replies claiming its MAC address is the router's IP. Every device that accepts this reply routes all traffic through the attacker. One MAC claiming to be many IPs = red flag.</div></div>
+    </div>
+  </div>
+  <div id="labdone" style="display:none;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-top:.5rem">
+    <div style="font-size:14px;font-weight:500;color:#085041;margin-bottom:6px">Lab 2 complete — you're moving fast!</div>
+    <div style="font-size:13px;color:#0F6E56;margin-bottom:10px">TCP handshake, DNS dissection, and ARP analysis done. Answer the knowledge check, then go to Module 3 — filtering mastery.</div>
+    <button onclick="sendPrompt('Lab 2 done. Take me to Module 3 and Lab 3: Wireshark filtering mastery.')">Go to Module 3 ↗</button>
+  </div>
+</div>
+
+<div class="tc" id="tc-terminal">
+  <div class="section-lbl">Mirror every lab task in PowerShell</div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Watch TCP connections form in real time</div>
+    <div class="cmd">netstat -an 2</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Refreshes every 2 seconds. Start this BEFORE visiting neverssl.com. Watch a new ESTABLISHED connection appear on port 80 — this is the same TCP connection whose handshake you see in Wireshark.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Manually perform a DNS lookup — Type A record</div>
+    <div class="cmd">Resolve-DnsName neverssl.com -Type A</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">This generates one DNS Query + one DNS Response — exactly the two packets you see in Wireshark with the dns filter. The IP returned must match Wireshark's DNS answer section.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Query different DNS record types</div>
+    <div class="cmd">Resolve-DnsName google.com -Type MX<br>Resolve-DnsName google.com -Type TXT<br>Resolve-DnsName google.com -Type AAAA</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Each of these generates different DNS query types. Watch them appear in Wireshark simultaneously. MX = mail servers. TXT = SPF/DMARC email auth records. AAAA = IPv6 addresses.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">View your ARP table (devices your machine knows about)</div>
+    <div class="cmd">arp -a</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Lists every IP-to-MAC mapping cached on your machine. These are the devices you have recently communicated with on your local network. Compare this with the ARP packets you captured — they should match. In an ARP poisoning attack, the attacker's MAC would appear here next to your gateway IP.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Send a ping and watch ICMP in Wireshark simultaneously</div>
+    <div class="cmd">ping -n 5 neverssl.com</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Run this while Wireshark captures. Apply filter icmp. You will see exactly 5 Echo Request packets (Type 8) and 5 Echo Reply packets (Type 0). The round-trip time in Wireshark's Time column will match the ms values ping reports in the terminal.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Trace the route and watch it in Wireshark</div>
+    <div class="cmd">tracert neverssl.com</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">Each hop generates 3 ICMP packets with a different TTL. In Wireshark with filter icmp, watch packets with TTL=1, TTL=2, TTL=3 appear in sequence — each one reaching one router further. This is how tracert maps the network path to a destination.</div>
+  </div>
+</div>
+
+<div class="tc" id="tc-quiz">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">5 questions — answer all before moving to Module 3.</div>
+  <div class="card" style="margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">1. In a TCP 3-way handshake, what does the server's SYN-ACK packet prove?</div>
+    <div class="qopt" onclick="ans(this,false)">The server has sent data successfully to the client</div>
+    <div class="qopt" onclick="ans(this,true)">The server received the client's SYN and is ready — it acknowledges the client's sequence number + 1</div>
+    <div class="qopt" onclick="ans(this,false)">The connection is now fully established and data transfer begins</div>
+    <div class="qres" id="qr0"></div>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">2. You work at Power Grid Corp. You see hundreds of SYN packets from one IP to many different destination ports in 2 seconds. What is happening?</div>
+    <div class="qopt" onclick="ans(this,false)">Normal web browsing — browsers open many connections simultaneously</div>
+    <div class="qopt" onclick="ans(this,false)">A DNS amplification attack targeting the DNS server</div>
+    <div class="qopt" onclick="ans(this,true)">A port scan — an attacker is probing which ports are open on your network</div>
+    <div class="qres" id="qr1"></div>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">3. DNS uses which transport protocol and port?</div>
+    <div class="qopt" onclick="ans(this,false)">TCP port 80</div>
+    <div class="qopt" onclick="ans(this,true)">UDP port 53 (TCP port 53 for large responses)</div>
+    <div class="qopt" onclick="ans(this,false)">ICMP — no port number</div>
+    <div class="qres" id="qr2"></div>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">4. In Wireshark, you see the same IP address appearing in multiple ARP Replies claiming to be different IPs including your gateway. What is this?</div>
+    <div class="qopt" onclick="ans(this,false)">Normal ARP behaviour — one device can have multiple IP addresses</div>
+    <div class="qopt" onclick="ans(this,true)">ARP poisoning — an attacker is attempting a man-in-the-middle attack by redirecting traffic through their machine</div>
+    <div class="qopt" onclick="ans(this,false)">A DHCP server assigning new addresses to devices</div>
+    <div class="qres" id="qr3"></div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">5. ARP operates at which OSI layer, and why can it NOT cross a router?</div>
+    <div class="qopt" onclick="ans(this,false)">Layer 3 — routers strip IP headers before forwarding</div>
+    <div class="qopt" onclick="ans(this,true)">Layer 2 — ARP works with MAC addresses which are only valid within a local subnet; routers operate at Layer 3 and do not forward Layer 2 broadcasts</div>
+    <div class="qopt" onclick="ans(this,false)">Layer 4 — it requires a TCP connection which routers block by default</div>
+    <div class="qres" id="qr4"></div>
+  </div>
+  <div id="qdone" style="display:none;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-top:1rem">
+    <div style="font-size:14px;font-weight:500;color:#085041">All 5 questions answered!</div>
+    <div style="font-size:13px;color:#0F6E56;margin-top:4px;margin-bottom:10px">Solid understanding of Module 2. Complete the lab tasks, then head to Module 3 — filtering mastery.</div>
+    <button onclick="sendPrompt('Module 2 and Lab 2 done. Take me to Module 3 and Lab 3: Wireshark filtering mastery.')">Module 3 → ↗</button>
+  </div>
+</div>
+
+</div>
+<script>
+const st=Array(9).fill(false);
+function tick(i){
+  st[i]=!st[i];
+  document.getElementById('c'+i).className='chk'+(st[i]?' done':'');
+  document.getElementById('t'+i).className='tlabel'+(st[i]?' done':'');
+  const d=st.filter(Boolean).length;
+  document.getElementById('pbar').style.width=Math.round(d/9*100)+'%';
+  document.getElementById('plabel').textContent=d+' / 9';
+  document.getElementById('ppct').textContent=Math.round(d/9*100)+'%';
+  document.getElementById('labdone').style.display=d===9?'block':'none';
+}
+function sw(name,btn){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tc-'+name).classList.add('on');
+  btn.classList.add('on');
+}
+let qa=0;
+function ans(el,ok){
+  const card=el.closest('.card');
+  if(card.querySelector('.ok')||card.querySelector('.no'))return;
+  el.className='qopt '+(ok?'ok':'no');
+  if(!ok){Array.from(card.querySelectorAll('.qopt')).forEach(o=>{if(o!==el&&o.getAttribute('onclick').includes('true'))o.className='qopt ok';});}
+  const res=card.querySelector('.qres');
+  res.textContent=ok?'Correct.':'Not quite — correct answer highlighted above.';
+  res.style.background=ok?'#E1F5EE':'#FCEBEB';
+  res.style.color=ok?'#085041':'#791F1F';
+  res.classList.add('show');
+  qa++;
+  if(qa===5)document.getElementById('qdone').style.display='block';
+}
+</script>
